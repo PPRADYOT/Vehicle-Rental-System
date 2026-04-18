@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+
+{% block title %}Home - Vehicle Rental System{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12 mb-4">
+        <h1 class="display-4">Dashboard</h1>
+        <p class="lead">Welcome to the Vehicle Rental System Dashboard</p>
+    </div>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row g-4 mb-5">
+    <!-- Total Vehicles Card -->
+    <div class="col-md-6 col-lg-3">
+        <div class="card h-100 border-0 shadow-sm bg-gradient-primary stat-card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title text-muted">Total Vehicles</h6>
+                        <h2 class="card-text text-primary">{{ stats.total_vehicles }}</h2>
+                    </div>
+                    <div class="stat-icon bg-primary-light">
+                        <i class="bi bi-car-front"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Total Customers Card -->
+    <div class="col-md-6 col-lg-3">
+        <div class="card h-100 border-0 shadow-sm bg-gradient-success stat-card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title text-muted">Total Customers</h6>
+                        <h2 class="card-text text-success">{{ stats.total_customers }}</h2>
+                    </div>
+                    <div class="stat-icon bg-success-light">
+                        <i class="bi bi-people"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Total Rentals Card -->
+    <div class="col-md-6 col-lg-3">
+        <div class="card h-100 border-0 shadow-sm bg-gradient-info stat-card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title text-muted">Total Rentals</h6>
+                        <h2 class="card-text text-info">{{ stats.total_rentals }}</h2>
+                    </div>
+                    <div class="stat-icon bg-info-light">
+                        <i class="bi bi-calendar-check"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Available Vehicles Card -->
+    <div class="col-md-6 col-lg-3">
+        <div class="card h-100 border-0 shadow-sm bg-gradient-warning stat-card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title text-muted">Available</h6>
+                        <h2 class="card-text text-warning">{{ stats.available_vehicles }}</h2>
+                    </div>
+                    <div class="stat-icon bg-warning-light">
+                        <i class="bi bi-check-circle"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rented Vehicles Card -->
+    <div class="col-md-6 col-lg-3">
+        <div class="card h-100 border-0 shadow-sm bg-gradient-danger stat-card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title text-muted">Rented</h6>
+                        <h2 class="card-text text-danger">{{ stats.rented_vehicles }}</h2>
+                    </div>
+                    <div class="stat-icon bg-danger-light">
+                        <i class="bi bi-exclamation-circle"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Info Section -->
+<div class="row g-4">
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">System Status</h5>
+            </div>
+            <div class="card-body">
+                <div class="list-group list-group-flush">
+                    <div class="list-group-item d-flex justify-content-between">
+                        <span>Total Fleet Size:</span>
+                        <strong>{{ stats.total_vehicles }} vehicles</strong>
+                    </div>
+                    <div class="list-group-item d-flex justify-content-between">
+                        <span>Fleet Utilization:</span>
+                        <strong>
+                            {% if stats.total_vehicles > 0 %}
+                                {{ (stats.rented_vehicles / stats.total_vehicles * 100) | int }}%
+                            {% else %}
+                                0%
+                            {% endif %}
+                        </strong>
+                    </div>
+                    <div class="list-group-item d-flex justify-content-between">
+                        <span>Registered Customers:</span>
+                        <strong>{{ stats.total_customers }} customers</strong>
+                    </div>
+                    <div class="list-group-item d-flex justify-content-between">
+                        <span>Total Transactions:</span>
+                        <strong>{{ stats.total_rentals }} rentals</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">Quick Links</h5>
+            </div>
+            <div class="card-body">
+                <div class="list-group">
+                    <a href="/data" class="list-group-item list-group-item-action">
+                        <i class="bi bi-table"></i> View All Data Tables
+                        <i class="bi bi-arrow-right float-end"></i>
+                    </a>
+                    <a href="/statistics" class="list-group-item list-group-item-action">
+                        <i class="bi bi-bar-chart"></i> View Statistics & Charts
+                        <i class="bi bi-arrow-right float-end"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

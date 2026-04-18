@@ -1,0 +1,221 @@
+{% extends "base.html" %}
+
+{% block title %}Data View - Vehicle Rental System{% endblock %}
+
+{% block extra_css %}
+<style>
+    .table-container {
+        overflow-x: auto;
+    }
+    .search-box {
+        margin-bottom: 15px;
+    }
+    .badge-available {
+        background-color: #28a745;
+    }
+    .badge-rented {
+        background-color: #dc3545;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12 mb-4">
+        <h1 class="display-5">Data Management</h1>
+        <p class="lead">View and search all system data</p>
+    </div>
+</div>
+
+<!-- Tabs for different data types -->
+<ul class="nav nav-tabs mb-4" id="dataTabs" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="vehicles-tab" data-bs-toggle="tab" 
+                data-bs-target="#vehicles" type="button" role="tab">
+            <i class="bi bi-car-front"></i> Vehicles ({{ vehicles|length }})
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="customers-tab" data-bs-toggle="tab" 
+                data-bs-target="#customers" type="button" role="tab">
+            <i class="bi bi-people"></i> Customers ({{ customers|length }})
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="rentals-tab" data-bs-toggle="tab" 
+                data-bs-target="#rentals" type="button" role="tab">
+            <i class="bi bi-calendar-check"></i> Rentals ({{ rentals|length }})
+        </button>
+    </li>
+</ul>
+
+<!-- Tab Content -->
+<div class="tab-content" id="dataTabContent">
+    <!-- Vehicles Tab -->
+    <div class="tab-pane fade show active" id="vehicles" role="tabpanel">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <div class="search-box">
+                    <input type="text" class="form-control" id="vehicleSearch" 
+                           placeholder="Search vehicles by ID, brand, or model...">
+                </div>
+                
+                {% if vehicles|length > 0 %}
+                    <div class="table-container">
+                        <table class="table table-hover" id="vehicleTable">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Type</th>
+                                    <th>Brand</th>
+                                    <th>Model</th>
+                                    <th>Rent/Day</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for vehicle in vehicles %}
+                                    <tr>
+                                        <td><strong>{{ vehicle.id }}</strong></td>
+                                        <td>
+                                            <span class="badge bg-secondary">{{ vehicle.type }}</span>
+                                        </td>
+                                        <td>{{ vehicle.brand }}</td>
+                                        <td>{{ vehicle.model }}</td>
+                                        <td>${{ vehicle.rentPerDay }}</td>
+                                        <td>
+                                            {% if vehicle.status == 'Available' %}
+                                                <span class="badge badge-available">Available</span>
+                                            {% else %}
+                                                <span class="badge badge-rented">Rented</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="alert alert-info" role="alert">
+                        <i class="bi bi-info-circle"></i> No vehicles found in the system.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Customers Tab -->
+    <div class="tab-pane fade" id="customers" role="tabpanel">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <div class="search-box">
+                    <input type="text" class="form-control" id="customerSearch" 
+                           placeholder="Search customers by ID or name...">
+                </div>
+                
+                {% if customers|length > 0 %}
+                    <div class="table-container">
+                        <table class="table table-hover" id="customerTable">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Name</th>
+                                    <th>Phone</th>
+                                    <th>Email</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for customer in customers %}
+                                    <tr>
+                                        <td><strong>{{ customer.id }}</strong></td>
+                                        <td>{{ customer.name }}</td>
+                                        <td>{{ customer.phone }}</td>
+                                        <td>{{ customer.email }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="alert alert-info" role="alert">
+                        <i class="bi bi-info-circle"></i> No customers found in the system.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Rentals Tab -->
+    <div class="tab-pane fade" id="rentals" role="tabpanel">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <div class="search-box">
+                    <input type="text" class="form-control" id="rentalSearch" 
+                           placeholder="Search rentals by ID or customer ID...">
+                </div>
+                
+                {% if rentals|length > 0 %}
+                    <div class="table-container">
+                        <table class="table table-hover" id="rentalTable">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Rental ID</th>
+                                    <th>Customer ID</th>
+                                    <th>Vehicle ID</th>
+                                    <th>Start Date</th>
+                                    <th>End Date</th>
+                                    <th>Total Cost</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for rental in rentals %}
+                                    <tr>
+                                        <td><strong>{{ rental.rentalId }}</strong></td>
+                                        <td>{{ rental.customerId }}</td>
+                                        <td>{{ rental.vehicleId }}</td>
+                                        <td>{{ rental.startDate }}</td>
+                                        <td>{{ rental.endDate }}</td>
+                                        <td><strong>${{ rental.totalCost }}</strong></td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="alert alert-info" role="alert">
+                        <i class="bi bi-info-circle"></i> No rentals found in the system.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Client-side search functionality
+    document.getElementById('vehicleSearch').addEventListener('keyup', function() {
+        filterTable('vehicleTable', this.value);
+    });
+
+    document.getElementById('customerSearch').addEventListener('keyup', function() {
+        filterTable('customerTable', this.value);
+    });
+
+    document.getElementById('rentalSearch').addEventListener('keyup', function() {
+        filterTable('rentalTable', this.value);
+    });
+
+    function filterTable(tableId, searchText) {
+        const table = document.getElementById(tableId);
+        const rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+        
+        for (let row of rows) {
+            const text = row.textContent.toLowerCase();
+            row.style.display = text.includes(searchText.toLowerCase()) ? '' : 'none';
+        }
+    }
+</script>
+{% endblock %}

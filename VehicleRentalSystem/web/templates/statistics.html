@@ -1,0 +1,263 @@
+{% extends "base.html" %}
+
+{% block title %}Statistics - Vehicle Rental System{% endblock %}
+
+{% block extra_css %}
+<style>
+    .chart-container {
+        position: relative;
+        height: 400px;
+        margin-bottom: 30px;
+    }
+    .kpi-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 10px;
+    }
+    .kpi-value {
+        font-size: 2.5rem;
+        font-weight: bold;
+        margin: 10px 0;
+    }
+    .kpi-label {
+        font-size: 0.9rem;
+        opacity: 0.9;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12 mb-4">
+        <h1 class="display-5">Statistics & Analytics</h1>
+        <p class="lead">Key metrics and vehicle rental insights</p>
+    </div>
+</div>
+
+<!-- KPI Cards -->
+<div class="row g-4 mb-5">
+    <div class="col-md-6 col-lg-3">
+        <div class="card kpi-card">
+            <div class="card-body">
+                <div class="kpi-label">Total Revenue</div>
+                <div class="kpi-value" id="totalRevenue">$0.00</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-lg-3">
+        <div class="card kpi-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+            <div class="card-body">
+                <div class="kpi-label">Most Rented Type</div>
+                <div class="kpi-value" id="mostRentedType">-</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-lg-3">
+        <div class="card kpi-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+            <div class="card-body">
+                <div class="kpi-label">Total Customers</div>
+                <div class="kpi-value" id="totalCustomers">0</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-lg-3">
+        <div class="card kpi-card" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+            <div class="card-body">
+                <div class="kpi-label">Total Rentals</div>
+                <div class="kpi-value" id="totalRentals">0</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts Section -->
+<div class="row g-4">
+    <!-- Vehicle Status Chart -->
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="bi bi-pie-chart"></i> Vehicle Availability Status</h5>
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="vehicleStatusChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Vehicle Type Distribution Chart -->
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0"><i class="bi bi-bar-chart"></i> Vehicle Type Distribution</h5>
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="vehicleTypeChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Additional Insights -->
+<div class="row g-4 mt-4">
+    <div class="col-lg-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0"><i class="bi bi-graph-up"></i> System Insights</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4 text-center mb-3">
+                        <h6 class="text-muted">Fleet Efficiency</h6>
+                        <div id="fleetEfficiency" class="display-6 text-success">0%</div>
+                        <small class="text-muted">Vehicles currently rented</small>
+                    </div>
+                    <div class="col-md-4 text-center mb-3">
+                        <h6 class="text-muted">Average Rental Cost</h6>
+                        <div id="avgRentalCost" class="display-6 text-info">$0.00</div>
+                        <small class="text-muted">Per transaction</small>
+                    </div>
+                    <div class="col-md-4 text-center mb-3">
+                        <h6 class="text-muted">System Health</h6>
+                        <div class="display-6" id="systemHealth" style="color: #28a745;">Excellent</div>
+                        <small class="text-muted">All systems operational</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let vehicleStatusChart, vehicleTypeChart;
+
+    document.addEventListener('DOMContentLoaded', function() {
+        loadStatistics();
+    });
+
+    function loadStatistics() {
+        // Load KPI data
+        fetch('/api/statistics-summary')
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('totalRevenue').textContent = data.total_revenue;
+                document.getElementById('mostRentedType').textContent = data.most_rented_type;
+                document.getElementById('totalCustomers').textContent = data.total_customers;
+                document.getElementById('totalRentals').textContent = data.total_rentals;
+
+                // Calculate average rental cost
+                const rentals = parseInt(data.total_rentals) || 1;
+                const totalRevenue = parseFloat(data.total_revenue.replace('$', '')) || 0;
+                const avgCost = (totalRevenue / rentals).toFixed(2);
+                document.getElementById('avgRentalCost').textContent = '$' + avgCost;
+            });
+
+        // Load vehicle status chart
+        fetch('/api/vehicle-status-chart')
+            .then(response => response.json())
+            .then(data => initVehicleStatusChart(data));
+
+        // Load vehicle type chart
+        fetch('/api/vehicle-type-chart')
+            .then(response => response.json())
+            .then(data => initVehicleTypeChart(data));
+    }
+
+    function initVehicleStatusChart(data) {
+        const ctx = document.getElementById('vehicleStatusChart').getContext('2d');
+        
+        if (vehicleStatusChart) {
+            vehicleStatusChart.destroy();
+        }
+
+        vehicleStatusChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: data.labels,
+                datasets: [{
+                    data: data.data,
+                    backgroundColor: [
+                        '#28a745',
+                        '#dc3545'
+                    ],
+                    borderColor: '#fff',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 15,
+                            font: { size: 12 }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    function initVehicleTypeChart(data) {
+        const ctx = document.getElementById('vehicleTypeChart').getContext('2d');
+        
+        if (vehicleTypeChart) {
+            vehicleTypeChart.destroy();
+        }
+
+        vehicleTypeChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: data.labels,
+                datasets: [{
+                    label: 'Number of Vehicles',
+                    data: data.data,
+                    backgroundColor: [
+                        '#0d6efd',
+                        '#dc3545',
+                        '#198754'
+                    ],
+                    borderColor: '#fff',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                indexAxis: 'y',
+                plugins: {
+                    legend: {
+                        display: true,
+                        labels: {
+                            font: { size: 12 }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // Refresh statistics every 10 seconds
+    setInterval(loadStatistics, 10000);
+</script>
+{% endblock %}

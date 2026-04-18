@@ -1,0 +1,167 @@
+================================================================================
+         VEHICLE RENTAL SYSTEM - UML CLASS DIAGRAM (ASCII FORMAT)
+================================================================================
+
+INHERITANCE HIERARCHY:
+======================
+
+                        ┌─────────────────┐
+                        │   Vehicle       │
+                        │   (Abstract)    │
+                        ├─────────────────┤
+                        │ - vehicleId     │
+                        │ - brand         │
+                        │ - model         │
+                        │ - rentPerDay    │
+                        │ - status        │
+                        ├─────────────────┤
+                        │ + getters()     │
+                        │ + setters()     │✱
+                        │ + calcCost()    │ (Pure Virtual)
+                        └────────┬────────┘
+                                 │ ◁ Inheritance
+                    ┌────────────┼────────────┐
+                    │            │            │
+        ┌───────────▼──┐ ┌──────▼──────┐ ┌──▼──────────┐
+        │     Car      │ │    Bike     │ │   Truck     │
+        ├──────────────┤ ├─────────────┤ ├─────────────┤
+        │ calcCost():  │ │ calcCost(): │ │ calcCost(): │
+        │ 1.0 × base   │ │ 0.8 × base  │ │ 1.3 × base  │
+        │ × days       │ │ × days      │ │ × days      │
+        │              │ │             │ │             │
+        │ No discount  │ │ 20% discount│ │ 30% surcharge│
+        └──────────────┘ └─────────────┘ └─────────────┘
+
+
+COMPOSITION & AGGREGATION:
+==========================
+
+        ┌──────────────────┐
+        │ RentalManager    │
+        │                  │
+        │ COMPOSITION      │
+        │ ◆─────┐          │
+        │       └──┤ customers: vector<Customer>
+        │          │ ◆─────┐
+        │          │       │ ┌──────────────┐
+        ├──────────┼───────├─┤  Customer    │
+        │          │       │ ├──────────────┤
+        │ AGGREGATION      │ │ - customerId │
+        │ ◇─────┐          │ │ - name       │
+        │       └──┤        │ │ - phone      │
+        │ vehicles: vector<Vehicle*>  │ - email      │
+        │ (polymorphic pointers)      └──────────────┘
+        │       └──┤
+        │ AGGREGATION
+        │ ◇─────┐  │
+        │       └──┤ rentals: vector<Rental>
+        │          │ ◇─────┐
+        │          │       │ ┌──────────────┐
+        └──────────┼───────├─┤   Rental     │
+                   │       │ ├──────────────┤
+                   │       │ │ - rentalId   │
+                   │       │ │ - customerId │
+                   │       │ │ - vehicleId  │
+                   │       │ │ - startDate  │
+                   │       │ │ - endDate    │
+                   │       │ │ - totalCost  │
+                   │       │ └──────────────┘
+                   │
+        ┌──────────▼──────────┐
+        │  FileManager        │
+        ├─────────────────────┤
+        │ - vPath             │ (vehicles.csv)
+        │ - cPath             │ (customers.csv)
+        │ - rPath             │ (rentals.csv)
+        ├─────────────────────┤
+        │ + loadVehicles()    │
+        │ + loadCustomers()   │
+        │ + loadRentals()     │
+        │ + saveVehicles()    │
+        │ + saveCustomers()   │
+        │ + saveRentals()     │
+        └─────────────────────┘
+
+
+RELATIONSHIP DETAILS:
+=====================
+
+◆ COMPOSITION (Strong Ownership):
+  - RentalManager ◆── Customer
+  - RentalManager owns and manages Customer objects
+  - Customers are deleted when RentalManager is destroyed
+
+◇ AGGREGATION (Weak Ownership):
+  - RentalManager ◇── Vehicle
+  - RentalManager ◇── Rental
+  - Manager groups these objects but doesn't strictly own their lifecycle
+  - Uses collections to manage multiple objects of these types
+
+◁ INHERITANCE (IS-A):
+  - Car IS-A Vehicle
+  - Bike IS-A Vehicle
+  - Truck IS-A Vehicle
+  - Each derived class implements the pure virtual calculateRentalCost() method
+  - Enables polymorphism: Vehicle* pointers can point to any derived type
+
+
+DATA FLOW ARCHITECTURE:
+=======================
+
+C++ Backend                     CSV Files               Flask Web Dashboard
+┌──────────────────┐           ┌───────────┐          ┌──────────────────┐
+│ RentalManager    │◄─────────►│vehicles   │          │ Flask App        │
+│ + vehicles       │           │.csv       │◄────────►│ + home()         │
+│ + customers      │           └───────────┘          │ + data_view()    │
+│ + rentals        │                                   │ + statistics()   │
+├──────────────────┤           ┌───────────┐          ├──────────────────┤
+│ FileManager      │◄─────────►│customers  │          │ Templates        │
+│ + load/save()    │           │.csv       │◄────────►│ + base.html      │
+└──────────────────┘           └───────────┘          │ + home.html      │
+                                                       │ + data_view.html │
+                               ┌───────────┐          │ + statistics.html│
+                              │rentals    │◄────────►│                  │
+                              │.csv       │          │ Static Assets    │
+                              └───────────┘          │ + style.css      │
+                                                       │ + charts.js      │
+                                                       └──────────────────┘
+
+Legend:
+  ◆  = Composition (strong ownership)
+  ◇  = Aggregation (weak ownership)
+  ◁  = Inheritance (IS-A relationship)
+  ──► = Data flow direction
+  •  = One-to-One relationship
+  *  = One-to-Many relationship
+
+
+KEY DESIGN PATTERNS:
+====================
+
+1. POLYMORPHISM (Method Overriding):
+   - Vehicle system uses pure virtual calculateRentalCost()
+   - Each subclass (Car, Bike, Truck) implements differently
+   - RentalManager calls method through base class pointer
+   - Actual implementation determined at runtime
+
+2. ENCAPSULATION (Data Hiding):
+   - All class members are private
+   - Public getters/setters for controlled access
+   - Implementation details hidden from users
+
+3. COMPOSITION & AGGREGATION (Object Relationships):
+   - RentalManager composes Customers
+   - RentalManager aggregates Vehicles and Rentals
+   - Clear ownership and lifecycle management
+
+4. CSV-BASED PERSISTENCE:
+   - FileManager handles serialization/deserialization
+   - C++ backend and Flask frontend share same data source
+   - No direct backend-frontend communication
+
+5. MVC PATTERN (Web Dashboard):
+   - Model: Flask app reads CSV files
+   - View: HTML templates display data
+   - Controller: Flask routes handle requests and business logic
+
+================================================================================

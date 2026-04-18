@@ -1,0 +1,10 @@
+id,type,brand,model,rentPerDay,status
+V001,Car,Toyota,Camry,50,Available
+V002,Car,Honda,Civic,45,Available
+V003,Bike,Yamaha,YZF-R1,20,Available
+V004,Bike,Harley-Davidson,Street 750,25,Rented
+V005,Truck,Ford,F-150,80,Available
+V006,Truck,Chevrolet,Silverado,85,Available
+V007,Car,BMW,M3,120,Available
+V008,Bike,Kawasaki,Ninja 400,18,Available
+V001,Car,Tesla,Model S,150,Available

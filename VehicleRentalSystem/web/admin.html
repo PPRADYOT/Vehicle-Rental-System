@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vehicle Rental System - Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="/static/style.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+        }
+
+        .login-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+        }
+
+        .login-box {
+            background: white;
+            padding: 3rem;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            width: 100%;
+            max-width: 420px;
+            backdrop-filter: blur(10px);
+        }
+
+        .login-box h1 {
+            text-align: center;
+            margin-bottom: 0.5rem;
+            color: #1a1a2e;
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        .login-box p {
+            text-align: center;
+            color: #999;
+            margin-bottom: 2rem;
+            font-size: 0.9rem;
+        }
+
+        .form-control {
+            border-radius: 10px;
+            padding: 0.85rem 1rem;
+            border: 2px solid #eee;
+            transition: all 0.3s;
+            font-size: 0.95rem;
+        }
+
+        .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.3rem rgba(102, 126, 234, 0.15);
+            outline: none;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 0.85rem;
+            font-weight: 600;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1rem;
+            margin-top: 1rem;
+        }
+
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 35px rgba(102, 126, 234, 0.4);
+        }
+
+        .admin-content {
+            display: none;
+        }
+
+        .form-section {
+            display: none;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .form-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .navbar {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%) !important;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            padding: 1rem 0;
+        }
+
+        .navbar-brand {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #fff !important;
+        }
+
+        .navbar-brand i {
+            margin-right: 0.5rem;
+            color: #0dcaf0;
+        }
+
+        .container-fluid {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        .sidebar {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: calc(100vh - 60px);
+            padding: 2rem 0;
+            position: sticky;
+            top: 60px;
+        }
+
+        .sidebar-item {
+            color: #adb5bd;
+            padding: 1rem 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-left: 4px solid transparent;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .sidebar-item i {
+            font-size: 1.1rem;
+        }
+
+        .sidebar-item:hover, .sidebar-item.active {
+            color: #fff;
+            background-color: rgba(255,255,255,0.1);
+            border-left-color: #0dcaf0;
+            padding-left: 1.75rem;
+        }
+
+        .content-area {
+            padding: 2rem;
+            background: #f5f7fa;
+            min-height: calc(100vh - 60px);
+        }
+
+        .admin-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .card-stat {
+            background: white;
+            border-left: 5px solid #667eea;
+            padding: 1.75rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            transition: all 0.3s;
+        }
+
+        .card-stat:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 25px rgba(0,0,0,0.12);
+        }
+
+        .card-stat h6 {
+            color: #999;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 0.75rem;
+            font-weight: 600;
+        }
+
+        .card-stat .value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .form-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            margin-bottom: 2rem;
+        }
+
+        .form-card h2 {
+            color: #1a1a2e;
+            margin-bottom: 1.5rem;
+            font-size: 1.75rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .form-card h2 i {
+            color: #667eea;
+            font-size: 2rem;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            padding: 0.85rem 2rem;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1rem;
+            margin-top: 1rem;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .table-responsive {
+            border-radius: 12px;
+            overflow: hidden;
+            background: white;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+
+        .table {
+            margin-bottom: 0;
+            font-size: 0.95rem;
+        }
+
+        .table thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+        }
+
+        .table thead th {
+            padding: 1.25rem;
+            border: none;
+        }
+
+        .table tbody td {
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid #f0f0f0;
+            vertical-align: middle;
+        }
+
+        .table tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .badge {
+            padding: 0.5rem 0.85rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .badge.bg-success {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+        }
+
+        .badge.bg-danger {
+            background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%);
+            color: white;
+        }
+
+        .alert {
+            border: none;
+            border-radius: 10px;
+            padding: 1rem 1.5rem;
+            margin-top: 1rem;
+            animation: slideIn 0.3s ease-in-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .alert-success {
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+            color: #155724;
+            border-left: 4px solid #28a745;
+        }
+
+        .alert-danger {
+            background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+            color: #721c24;
+            border-left: 4px solid #dc3545;
+        }
+
+        .nav-tabs {
+            border-bottom: 2px solid #eee;
+            gap: 1rem;
+        }
+
+        .nav-tabs .nav-link {
+            color: #666;
+            border: none;
+            padding: 0.75rem 1rem;
+            border-bottom: 3px solid transparent;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .nav-tabs .nav-link:hover {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+
+        .nav-tabs .nav-link.active {
+            color: white;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 8px;
+        }
+
+        .text-muted {
+            color: #999 !important;
+        }
+
+        input[type="text"]:invalid,
+        input[type="email"]:invalid,
+        input[type="tel"]:invalid,
+        input[type="date"]:invalid,
+        input[type="number"]:invalid {
+            border-color: #dc3545 !important;
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Section -->
+    <div id="loginSection">
+        <div class="login-container">
+            <div class="login-box">
+                <h1><i class="bi bi-car-front"></i> Admin Panel</h1>
+                <form onsubmit="handleLogin(event)">
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Username</label>
+                        <input type="text" class="form-control" id="username" placeholder="admin" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password" class="form-control" id="password" placeholder="password" required>
+                    </div>
+                    <button type="submit" class="btn btn-login btn-primary">Login</button>
+                    <small class="d-block text-center text-muted mt-3">Demo: username: <strong>admin</strong> | password: <strong>password</strong></small>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Dashboard -->
+    <div id="adminContent" class="admin-content">
+        <!-- Navigation -->
+        <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="#home">
+                    <i class="bi bi-car-front"></i> Vehicle Rental Admin
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item">
+                            <button class="nav-link btn btn-link" onclick="logout()">Logout</button>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <div class="container-fluid">
+            <div class="row">
+                <!-- Sidebar -->
+                <div class="col-md-3">
+                    <div class="sidebar">
+                        <div class="sidebar-item active" onclick="showSection('dashboard')">
+                            <i class="bi bi-graph-up"></i> Dashboard
+                        </div>
+                        <div class="sidebar-item" onclick="showSection('add-vehicle')">
+                            <i class="bi bi-plus-circle"></i> Add Vehicle
+                        </div>
+                        <div class="sidebar-item" onclick="showSection('add-customer')">
+                            <i class="bi bi-person-plus"></i> Add Customer
+                        </div>
+                        <div class="sidebar-item" onclick="showSection('add-rental')">
+                            <i class="bi bi-calendar-check"></i> Add Rental
+                        </div>
+                        <div class="sidebar-item" onclick="showSection('view-data')">
+                            <i class="bi bi-table"></i> View All Data
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Content Area -->
+                <div class="col-md-9 content-area">
+                    <!-- Dashboard Section -->
+                    <div id="dashboard" class="form-section active">
+                        <h2 class="mb-4"><i class="bi bi-graph-up"></i> Dashboard Overview</h2>
+                        <div class="admin-grid">
+                            <div class="card-stat">
+                                <h6><i class="bi bi-car-front"></i> Total Vehicles</h6>
+                                <div class="value" id="totalVehicles">0</div>
+                            </div>
+                            <div class="card-stat">
+                                <h6><i class="bi bi-check-circle"></i> Available</h6>
+                                <div class="value" id="availableVehicles">0</div>
+                            </div>
+                            <div class="card-stat">
+                                <h6><i class="bi bi-exclamation-circle"></i> Rented</h6>
+                                <div class="value" id="rentedVehicles">0</div>
+                            </div>
+                            <div class="card-stat">
+                                <h6><i class="bi bi-people"></i> Total Customers</h6>
+                                <div class="value" id="totalCustomers">0</div>
+                            </div>
+                            <div class="card-stat">
+                                <h6><i class="bi bi-calendar-check"></i> Total Rentals</h6>
+                                <div class="value" id="totalRentals">0</div>
+                            </div>
+                            <div class="card-stat">
+                                <h6><i class="bi bi-currency-dollar"></i> Total Revenue</h6>
+                                <div class="value">$<span id="totalRevenue">0</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Add Vehicle Form -->
+                    <div id="add-vehicle" class="form-section">
+                        <div class="form-card">
+                            <h2><i class="bi bi-plus-circle"></i> Add New Vehicle</h2>
+                            <form onsubmit="handleAddVehicle(event)">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label class="form-label"><i class="bi bi-key"></i> Vehicle ID</label>
+                                        <input type="text" class="form-control" id="vehicleId" placeholder="e.g., V001" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label"><i class="bi bi-car-front"></i> Type</label>
+                                        <select class="form-control" id="vehicleType" required>
+                                            <option value="">Select Vehicle Type</option>
+                                            <option value="Car">Car</option>
+                                            <option value="Bike">Bike</option>
+                                            <option value="Truck">Truck</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label class="form-label"><i class="bi bi-tag"></i> Brand</label>
+                                        <input type="text" class="form-control" id="vehicleBrand" placeholder="e.g., Toyota" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label"><i class="bi bi-tag"></i> Model</label>
+                                        <input type="text" class="form-control" id="vehicleModel" placeholder="e.g., Camry" required>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label class="form-label"><i class="bi bi-currency-dollar"></i> Rent Per Day</label>
+                                        <input type="number" class="form-control" id="vehicleRent" placeholder="50" step="0.01" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label"><i class="bi bi-check-circle"></i> Status</label>
+                                        <select class="form-control" id="vehicleStatus" required>
+                                            <option value="">Select Status</option>
+                                            <option value="Available">Available</option>
+                                            <option value="Rented">Rented</option>
+                                            <option value="Maintenance">Maintenance</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn-primary"><i class="bi bi-plus"></i> Add Vehicle</button>
+                            </form>
+                            <div id="vehicleMessage"></div>
+                        </div>
+                    </div>
+
+                    <!-- Add Customer Form -->
+                    <div id="add-customer" class="form-section">
+                        <div class="form-card">
+                            <h2><i class="bi bi-person-plus"></i> Add New Customer</h2>
+                            <form onsubmit="handleAddCustomer(event)">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label class="form-label"><i class="bi bi-key"></i> Customer ID</label>
+                                        <input type="text" class="form-control" id="customerId" placeholder="e.g., C001" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label"><i class="bi bi-person"></i> Full Name</label>
+                                        <input type="text" class="form-control" id="customerName" placeholder="e.g., John Doe" required>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label class="form-label"><i class="bi bi-telephone"></i> Phone Number</label>
+                                        <input type="tel" class="form-control" id="customerPhone" placeholder="e.g., 555-0123" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label"><i class="bi bi-envelope"></i> Email Address</label>
+                                        <input type="email" class="form-control" id="customerEmail" placeholder="e.g., john@example.com" required>
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn-primary"><i class="bi bi-plus"></i> Add Customer</button>
+                            </form>
+                            <div id="customerMessage"></div>
+                        </div>
+                    </div>
+
+                    <!-- Add Rental Form -->
+                    <div id="add-rental" class="form-section">
+                        <div class="form-card">
+                            <h2><i class="bi bi-calendar-check"></i> Create New Rental</h2>
+                            <form onsubmit="handleAddRental(event)">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label class="form-label"><i class="bi bi-key"></i> Rental ID</label>
+                                        <input type="text" class="form-control" id="rentalId" placeholder="e.g., R001" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label"><i class="bi bi-person"></i> Customer ID</label>
+                                        <input type="text" class="form-control" id="rentalCustomerId" placeholder="e.g., C001" required>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label class="form-label"><i class="bi bi-car-front"></i> Vehicle ID</label>
+                                        <input type="text" class="form-control" id="rentalVehicleId" placeholder="e.g., V001" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label"><i class="bi bi-calendar"></i> Status</label>
+                                        <select class="form-control" id="rentalStatus" required>
+                                            <option value="">Select Status</option>
+                                            <option value="Active">Active</option>
+                                            <option value="Completed">Completed</option>
+                                            <option value="Cancelled">Cancelled</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label class="form-label"><i class="bi bi-calendar-event"></i> Start Date</label>
+                                        <input type="date" class="form-control" id="rentalStartDate" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label"><i class="bi bi-calendar-event"></i> End Date</label>
+                                        <input type="date" class="form-control" id="rentalEndDate" required>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label class="form-label"><i class="bi bi-currency-dollar"></i> Total Cost</label>
+                                        <input type="number" class="form-control" id="rentalTotalCost" placeholder="250" step="0.01" required>
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn-primary"><i class="bi bi-plus"></i> Create Rental</button>
+                            </form>
+                            <div id="rentalMessage"></div>
+                        </div>
+                    </div>
+
+                    <!-- View Data Section -->
+                    <div id="view-data" class="form-section">
+                        <h2 class="mb-4"><i class="bi bi-table"></i> All Data</h2>
+                        <ul class="nav nav-tabs mb-4" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#vehiclesTable">
+                                    <i class="bi bi-car-front"></i> Vehicles
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#customersTable">
+                                    <i class="bi bi-people"></i> Customers
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#rentalsTable">
+                                    <i class="bi bi-calendar-check"></i> Rentals
+                                </button>
+                            </li>
+                        </ul>
+                        
+                        <div class="tab-content">
+                            <div class="tab-pane fade show active" id="vehiclesTable">
+                                <div class="table-responsive">
+                                    <table class="table">
+                                        <thead>
+                                            <tr>
+                                                <th>ID</th>
+                                                <th>Type</th>
+                                                <th>Brand</th>
+                                                <th>Model</th>
+                                                <th>Rent/Day</th>
+                                                <th>Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="vehiclesBody"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            
+                            <div class="tab-pane fade" id="customersTable">
+                                <div class="table-responsive">
+                                    <table class="table">
+                                        <thead>
+                                            <tr>
+                                                <th>ID</th>
+                                                <th>Name</th>
+                                                <th>Phone</th>
+                                                <th>Email</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="customersBody"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            
+                            <div class="tab-pane fade" id="rentalsTable">
+                                <div class="table-responsive">
+                                    <table class="table">
+                                        <thead>
+                                            <tr>
+                                                <th>Rental ID</th>
+                                                <th>Customer ID</th>
+                                                <th>Vehicle ID</th>
+                                                <th>Start Date</th>
+                                                <th>End Date</th>
+                                                <th>Total Cost</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="rentalsBody"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const ADMIN_USERNAME = 'admin';
+        const ADMIN_PASSWORD = 'password';
+
+        // Check if logged in
+        window.addEventListener('DOMContentLoaded', () => {
+            const token = localStorage.getItem('adminToken');
+            if (token === 'logged_in') {
+                showAdminContent();
+            }
+        });
+
+        function handleLogin(e) {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
+                localStorage.setItem('adminToken', 'logged_in');
+                showAdminContent();
+            } else {
+                alert('Invalid credentials');
+            }
+        }
+
+        function showAdminContent() {
+            document.getElementById('loginSection').style.display = 'none';
+            document.getElementById('adminContent').style.display = 'block';
+            loadDashboard();
+            loadAllData();
+        }
+
+        function logout() {
+            localStorage.removeItem('adminToken');
+            location.reload();
+        }
+
+        function showSection(sectionId) {
+            // Hide all sections
+            document.querySelectorAll('.form-section').forEach(el => el.classList.remove('active'));
+            // Show selected section
+            document.getElementById(sectionId).classList.add('active');
+            // Update sidebar
+            document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('active'));
+            event.target.closest('.sidebar-item').classList.add('active');
+            
+            if (sectionId === 'view-data') {
+                loadAllData();
+            }
+        }
+
+        async function loadDashboard() {
+            const stats = await fetch('/api/stats').then(r => r.json());
+            document.getElementById('totalVehicles').textContent = stats.totalVehicles;
+            document.getElementById('availableVehicles').textContent = stats.availableVehicles;
+            document.getElementById('rentedVehicles').textContent = stats.rentedVehicles;
+            document.getElementById('totalCustomers').textContent = stats.totalCustomers;
+            document.getElementById('totalRentals').textContent = stats.totalRentals;
+            document.getElementById('totalRevenue').textContent = stats.totalRevenue;
+        }
+
+        async function loadAllData() {
+            const vehicles = await fetch('/api/vehicles').then(r => r.json());
+            const customers = await fetch('/api/customers').then(r => r.json());
+            const rentals = await fetch('/api/rentals').then(r => r.json());
+
+            // Vehicles table
+            document.getElementById('vehiclesBody').innerHTML = vehicles.map(v => `
+                <tr>
+                    <td>${v.id || 'N/A'}</td>
+                    <td>${v.type || 'N/A'}</td>
+                    <td>${v.brand || 'N/A'}</td>
+                    <td>${v.model || 'N/A'}</td>
+                    <td>$${v.rentPerDay || '0'}</td>
+                    <td><span class="badge ${(v.status || '').trim() === 'Available' ? 'bg-success' : 'bg-danger'}">${v.status || 'N/A'}</span></td>
+                </tr>
+            `).join('');
+
+            // Customers table
+            document.getElementById('customersBody').innerHTML = customers.map(c => `
+                <tr>
+                    <td>${c.id || 'N/A'}</td>
+                    <td>${c.name || 'N/A'}</td>
+                    <td>${c.phone || 'N/A'}</td>
+                    <td>${c.email || 'N/A'}</td>
+                </tr>
+            `).join('');
+
+            // Rentals table
+            document.getElementById('rentalsBody').innerHTML = rentals.map(r => `
+                <tr>
+                    <td>${r.rentalId || 'N/A'}</td>
+                    <td>${r.customerId || 'N/A'}</td>
+                    <td>${r.vehicleId || 'N/A'}</td>
+                    <td>${r.startDate || 'N/A'}</td>
+                    <td>${r.endDate || 'N/A'}</td>
+                    <td>$${r.totalCost || '0'}</td>
+                </tr>
+            `).join('');
+        }
+
+        async function handleAddVehicle(e) {
+            e.preventDefault();
+            
+            const vehicleId = document.getElementById('vehicleId').value.trim();
+            const vehicleType = document.getElementById('vehicleType').value.trim();
+            const vehicleBrand = document.getElementById('vehicleBrand').value.trim();
+            const vehicleModel = document.getElementById('vehicleModel').value.trim();
+            const vehicleRent = document.getElementById('vehicleRent').value.trim();
+            const vehicleStatus = document.getElementById('vehicleStatus').value.trim();
+
+            if (!vehicleId || !vehicleType || !vehicleBrand || !vehicleModel || !vehicleRent || !vehicleStatus) {
+                alert('All fields are required!');
+                return;
+            }
+
+            const data = {
+                id: vehicleId,
+                type: vehicleType,
+                brand: vehicleBrand,
+                model: vehicleModel,
+                rentPerDay: vehicleRent,
+                status: vehicleStatus
+            };
+
+            try {
+                const response = await fetch('/api/vehicles', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+                const msgEl = document.getElementById('vehicleMessage');
+                msgEl.innerHTML = `<div class="alert alert-${result.success ? 'success' : 'danger'}">${result.message || result.error}</div>`;
+                
+                if (result.success) {
+                    e.target.reset();
+                    loadDashboard();
+                    loadAllData();
+                }
+                
+                setTimeout(() => msgEl.innerHTML = '', 5000);
+            } catch (err) {
+                document.getElementById('vehicleMessage').innerHTML = `<div class="alert alert-danger">Error: ${err.message}</div>`;
+            }
+        }
+
+        async function handleAddCustomer(e) {
+            e.preventDefault();
+            
+            const customerId = document.getElementById('customerId').value.trim();
+            const customerName = document.getElementById('customerName').value.trim();
+            const customerPhone = document.getElementById('customerPhone').value.trim();
+            const customerEmail = document.getElementById('customerEmail').value.trim();
+
+            if (!customerId || !customerName || !customerPhone || !customerEmail) {
+                alert('All fields are required!');
+                return;
+            }
+
+            const data = {
+                id: customerId,
+                name: customerName,
+                phone: customerPhone,
+                email: customerEmail
+            };
+
+            try {
+                const response = await fetch('/api/customers', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+                const msgEl = document.getElementById('customerMessage');
+                msgEl.innerHTML = `<div class="alert alert-${result.success ? 'success' : 'danger'}">${result.message || result.error}</div>`;
+                
+                if (result.success) {
+                    e.target.reset();
+                    loadDashboard();
+                    loadAllData();
+                }
+                
+                setTimeout(() => msgEl.innerHTML = '', 5000);
+            } catch (err) {
+                document.getElementById('customerMessage').innerHTML = `<div class="alert alert-danger">Error: ${err.message}</div>`;
+            }
+        }
+
+        async function handleAddRental(e) {
+            e.preventDefault();
+            
+            const rentalId = document.getElementById('rentalId').value.trim();
+            const rentalCustomerId = document.getElementById('rentalCustomerId').value.trim();
+            const rentalVehicleId = document.getElementById('rentalVehicleId').value.trim();
+            const rentalStartDate = document.getElementById('rentalStartDate').value.trim();
+            const rentalEndDate = document.getElementById('rentalEndDate').value.trim();
+            const rentalTotalCost = document.getElementById('rentalTotalCost').value.trim();
+
+            if (!rentalId || !rentalCustomerId || !rentalVehicleId || !rentalStartDate || !rentalEndDate || !rentalTotalCost) {
+                alert('All fields are required!');
+                return;
+            }
+
+            if (new Date(rentalStartDate) >= new Date(rentalEndDate)) {
+                alert('End date must be after start date!');
+                return;
+            }
+
+            const data = {
+                rentalId: rentalId,
+                customerId: rentalCustomerId,
+                vehicleId: rentalVehicleId,
+                startDate: rentalStartDate,
+                endDate: rentalEndDate,
+                totalCost: rentalTotalCost
+            };
+
+            try {
+                const response = await fetch('/api/rentals', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+                const msgEl = document.getElementById('rentalMessage');
+                msgEl.innerHTML = `<div class="alert alert-${result.success ? 'success' : 'danger'}">${result.message || result.error}</div>`;
+                
+                if (result.success) {
+                    e.target.reset();
+                    loadDashboard();
+                    loadAllData();
+                }
+                
+                setTimeout(() => msgEl.innerHTML = '', 5000);
+            } catch (err) {
+                document.getElementById('rentalMessage').innerHTML = `<div class="alert alert-danger">Error: ${err.message}</div>`;
+            }
+        }
+
+        // Refresh dashboard every 30 seconds
+        setInterval(loadDashboard, 30000);
+    </script>
+</body>
+</html>
