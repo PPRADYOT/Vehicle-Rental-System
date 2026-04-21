@@ -338,7 +338,7 @@
                         <div class="card border-0 shadow-sm">
                             <div class="card-body text-center">
                                 <h6 class="text-muted">Utilization Rate</h6>
-                                <h2 class="text-warning">${Math.round((stats.rentedVehicles / stats.totalVehicles) * 100)}%</h2>
+                                <h2 class="text-warning">${stats.totalVehicles > 0 ? Math.round((stats.rentedVehicles / stats.totalVehicles) * 100) : 0}%</h2>
                             </div>
                         </div>
                     </div>

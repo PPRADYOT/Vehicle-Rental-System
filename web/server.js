@@ -14,7 +14,7 @@ const CSV_PATH = process.env.VEHICLE_RENTAL_CSV_PATH || path.join(__dirname, '..
 function parseCSV(filePath) {
   try {
     const data = fs.readFileSync(filePath, 'utf-8');
-    const lines = data.split('\n').filter(line => line.trim());
+    const lines = data.split('\n').map(line => line.replace('\r', '')).filter(line => line.trim());
     if (lines.length === 0) return [];
     
     const headers = lines[0].split(',');
